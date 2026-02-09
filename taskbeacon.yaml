@@ -1,0 +1,11 @@
+id: T000012
+slug: sst
+title: "Stop-Signal Task (SST)"
+acquisition: eeg
+variant: baseline
+cognitive_domain: []
+maturity: piloted
+version:
+  release_tag: ""
+evidence: []
+maintainer: []

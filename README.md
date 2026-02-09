@@ -1,5 +1,7 @@
 # Stop-Signal Task (SST)
 
+![Maturity: piloted](https://img.shields.io/badge/Maturity-piloted-65a30d?style=for-the-badge&labelColor=c2410c)
+
 | Field                | Value                        |
 |----------------------|------------------------------|
 | Name                 | Stop-Signal Task (SST)       |
