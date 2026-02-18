@@ -45,31 +45,31 @@ def run_trial(
     trial_data = {"condition": condition}
     make_unit = partial(StimUnit, win=win, kb=kb, runtime=trigger_runtime)
 
-    # cue
+    # phase: go_response_window
     _condition = condition.split("_")[0]
     _stim = condition.split("_")[1]
     correct_key = settings.left_key if _stim == "left" else settings.right_key
 
-    # anticipation
+    # phase: go_response_window
     fix_stim = stim_bank.get("fixation")
     make_unit(unit_label="fixation").add_stim(fix_stim).show(
         duration=settings.fixation_duration,
         onset_trigger=settings.triggers.get("fixation_onset"),
     ).to_dict(trial_data)
 
-    # target
+    # phase: go_response_window
     if _condition == "go":
         go_stim = stim_bank.get(condition)
         go_unit = make_unit(unit_label="go").add_stim(go_stim)
         set_trial_context(
             go_unit,
             trial_id=trial_id,
-            phase="target",
+            phase="go_response_window",
             deadline_s=_deadline_s(settings.go_duration),
             valid_keys=list(settings.key_list),
             block_id=block_id,
             condition_id=str(condition),
-            task_factors={"condition": str(condition), "stage": "go", "block_idx": block_idx},
+            task_factors={"condition": str(condition), "stage": "go_response_window", "block_idx": block_idx},
             stim_id=str(condition),
         )
         go_unit.capture_response(
@@ -89,7 +89,7 @@ def run_trial(
                 onset_trigger=settings.triggers.get("no_response_feedback_onset"),
             ).to_dict(trial_data)
 
-    # feedback
+    # phase: pre_stop_go_window
     else:
         stop_stim = stim_bank.get(condition)
         go_stim = stim_bank.get(condition.replace("stop", "go"))
@@ -99,12 +99,12 @@ def run_trial(
         set_trial_context(
             go_unit,
             trial_id=trial_id,
-            phase="anticipation",
+            phase="pre_stop_go_window",
             deadline_s=_deadline_s(ssd),
             valid_keys=list(settings.key_list),
             block_id=block_id,
             condition_id=str(condition),
-            task_factors={"condition": str(condition), "stage": "go_ssd", "block_idx": block_idx},
+            task_factors={"condition": str(condition), "stage": "pre_stop_go_window", "block_idx": block_idx},
             stim_id=condition.replace("stop", "go"),
         )
         go_unit.capture_response(
@@ -122,12 +122,12 @@ def run_trial(
         set_trial_context(
             stop_unit,
             trial_id=trial_id,
-            phase="target",
+            phase="stop_signal_window",
             deadline_s=_deadline_s(rem),
             valid_keys=list(settings.key_list),
             block_id=block_id,
             condition_id=str(condition),
-            task_factors={"condition": str(condition), "stage": "stop", "block_idx": block_idx, "ssd_s": float(ssd)},
+            task_factors={"condition": str(condition), "stage": "stop_signal_window", "block_idx": block_idx, "ssd_s": float(ssd)},
             stim_id=str(condition),
         )
         stop_unit.capture_response(
