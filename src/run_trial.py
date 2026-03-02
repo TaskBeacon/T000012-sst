@@ -23,20 +23,29 @@ def run_trial(
     trial_data = {"condition": condition}
     make_unit = partial(StimUnit, win=win, kb=kb, runtime=trigger_runtime)
 
-    # phase: go_response_window
-    _condition = condition.split("_")[0]
-    _stim = condition.split("_")[1]
-    correct_key = settings.left_key if _stim == "left" else settings.right_key
+    cond_kind, cond_side = str(condition).split("_", 1)
+    correct_key = settings.left_key if cond_side == "left" else settings.right_key
 
-    # phase: go_response_window
-    fix_stim = stim_bank.get("fixation")
-    make_unit(unit_label="fixation").add_stim(fix_stim).show(
+    # phase: fixation
+    fix_unit = make_unit(unit_label="fixation").add_stim(stim_bank.get("fixation"))
+    set_trial_context(
+        fix_unit,
+        trial_id=trial_id,
+        phase="fixation",
+        deadline_s=settings.fixation_duration,
+        valid_keys=list(settings.key_list),
+        block_id=block_id,
+        condition_id=str(condition),
+        task_factors={"condition": str(condition), "stage": "fixation", "block_idx": block_idx},
+        stim_id="fixation",
+    )
+    fix_unit.show(
         duration=settings.fixation_duration,
         onset_trigger=settings.triggers.get("fixation_onset"),
     ).to_dict(trial_data)
 
     # phase: go_response_window
-    if _condition == "go":
+    if cond_kind == "go":
         go_stim = stim_bank.get(condition)
         go_unit = make_unit(unit_label="go").add_stim(go_stim)
         set_trial_context(
@@ -72,7 +81,8 @@ def run_trial(
         stop_stim = stim_bank.get(condition)
         go_stim = stim_bank.get(condition.replace("stop", "go"))
 
-        ssd = controller.get_ssd()
+        ssd = controller.get_ssd(stim=cond_side)
+        trial_data["ssd_s"] = float(ssd)
         go_unit = make_unit(unit_label="go_ssd").add_stim(go_stim)
         set_trial_context(
             go_unit,
@@ -88,14 +98,14 @@ def run_trial(
         go_unit.capture_response(
             keys=settings.key_list,
             duration=ssd,
-            onset_trigger=settings.triggers.get("pre_stop_onset"),
-            response_trigger=settings.triggers.get("pre_top_response"),
+            onset_trigger=settings.triggers.get("go_onset"),
+            response_trigger=settings.triggers.get("pre_stop_response"),
             terminate_on_response=False,
         )
         go_unit.to_dict(trial_data)
         resp1 = go_unit.get_state("key_press", False)
 
-        rem = settings.go_duration - ssd
+        rem = max(0.0, float(settings.go_duration) - float(ssd))
         stop_unit = make_unit(unit_label="stop").add_stim(stop_stim)
         set_trial_context(
             stop_unit,
@@ -105,13 +115,18 @@ def run_trial(
             valid_keys=list(settings.key_list),
             block_id=block_id,
             condition_id=str(condition),
-            task_factors={"condition": str(condition), "stage": "stop_signal_window", "block_idx": block_idx, "ssd_s": float(ssd)},
+            task_factors={
+                "condition": str(condition),
+                "stage": "stop_signal_window",
+                "block_idx": block_idx,
+                "ssd_s": float(ssd),
+            },
             stim_id=str(condition),
         )
         stop_unit.capture_response(
             keys=settings.key_list,
             duration=rem,
-            onset_trigger=settings.triggers.get("on_stop_onset"),
+            onset_trigger=settings.triggers.get("stop_onset"),
             response_trigger=settings.triggers.get("on_stop_response"),
             terminate_on_response=True,
         )
@@ -119,6 +134,7 @@ def run_trial(
         resp2 = stop_unit.get_state("key_press", False)
 
         failed_stop = bool(resp1 or resp2)
-        controller.update(success=not failed_stop)
+        trial_data["stop_failed"] = failed_stop
+        controller.update(success=not failed_stop, stim=cond_side)
 
     return trial_data

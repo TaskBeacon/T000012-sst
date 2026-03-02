@@ -4,8 +4,27 @@ All notable development changes for `T000012-sst` are documented here.
 
 ## [Unreleased]
 
+## [1.1.2] - 2026-03-02
+
+### Added
+- Added required reference artifacts under `references/`:
+  - `references.yaml`
+  - `references.md`
+  - `parameter_mapping.md`
+  - `stimulus_mapping.md`
+  - `task_logic_audit.md`
+- Added `responders/task_sampler.py` with `TaskSamplerResponder` and wired sampler sim to `responders.task_sampler:TaskSamplerResponder`.
+
 ### Changed
-- Refactored `src/run_trial.py` to use `psyflow`'s native `next_trial_id()` and removed legacy internal `_next_trial_id` and `_deadline_s` boilerplate.
+- Rewrote all `config/*.yaml` files to UTF-8 clean content and standardized section formatting.
+- Updated trigger map to include explicit `stop_onset` and aligned runtime trigger usage in stop-signal phase.
+- Updated `main.py` to send `exp_onset` and `exp_end` triggers and use non-terminating goodbye wait flow before explicit shutdown.
+- Updated `taskbeacon.yaml` release metadata and evidence/maintainer fields.
+- Refreshed `README.md` to standardized contract structure and phase/trigger alignment.
+
+### Fixed
+- Fixed SST controller SSD retrieval call to use side-aware key (`get_ssd(stim=cond_side)`), aligning retrieval with update semantics.
+- Removed encoding corruption (mojibake) in participant-facing config text and form labels.
 
 ## [1.1.1] - 2026-02-18
 - Refactored responder context phase names in `src/run_trial.py` to task-specific labels (removed generic MID-style phase naming).

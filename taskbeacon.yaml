@@ -1,4 +1,4 @@
-id: T000012
+﻿id: T000012
 slug: sst
 title: "Stop-Signal Task (SST)"
 acquisition: eeg
@@ -6,8 +6,15 @@ variant: baseline
 cognitive_domain: []
 maturity: piloted
 version:
-  release_tag: "v1.1.0"
+  release_tag: "v1.1.2"
 contracts:
   psyflow_taps: v0.1.0
-evidence: []
-maintainer: []
+evidence:
+  - references/references.yaml
+  - references/references.md
+  - references/parameter_mapping.md
+  - references/stimulus_mapping.md
+  - references/task_logic_audit.md
+maintainer:
+  - name: Zhipeng Cao
+    email: zhipeng30@foxmail.com

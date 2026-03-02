@@ -81,6 +81,7 @@ def run(options: TaskRunOptions):
 
         settings.controller = cfg["controller_config"]
         settings.save_to_json()
+        trigger_runtime.send(settings.triggers.get("exp_onset"))
         controller = Controller.from_dict(settings.controller)
 
         instr = StimUnit("instruction_text", win, kb, runtime=trigger_runtime).add_stim(stim_bank.get("instruction_text"))
@@ -139,9 +140,9 @@ def run(options: TaskRunOptions):
                 )
             ).wait_and_continue()
 
-        StimUnit("block", win, kb, runtime=trigger_runtime).add_stim(stim_bank.get("good_bye")).wait_and_continue(
-            terminate=True
-        )
+        StimUnit("goodbye", win, kb, runtime=trigger_runtime).add_stim(stim_bank.get("good_bye")).wait_and_continue()
+
+        trigger_runtime.send(settings.triggers.get("exp_end"))
 
         df = pd.DataFrame(all_data)
         df.to_csv(settings.res_file, index=False)
