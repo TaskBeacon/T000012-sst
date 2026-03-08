@@ -29,6 +29,8 @@ This SST measures the ability to suppress an already prepared motor response. Pa
 
 ## 2. Task Flow
 
+![Task flow](./task_flow.png)
+
 ### Block-Level Flow
 
 | Step | Description |
